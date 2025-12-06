@@ -1,0 +1,333 @@
+openapi: 3.1.0
+info:
+  title: Exodia API
+  version: 0.1.0
+  description: |
+    REST API for uploading Excel files, generating dashboards, and exposing CRUD capabilities.
+servers:
+  - url: http://localhost:8000
+    description: Local development
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+    Column:
+      type: object
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          enum: [string, number, boolean, date]
+    Sheet:
+      type: object
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        rowCount:
+          type: integer
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/Column"
+        rows:
+          type: array
+          items:
+            type: object
+    Repo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        excelId:
+          type: string
+          format: uuid
+        repoName:
+          type: string
+        repoUrl:
+          type: string
+          format: uri
+        branch:
+          type: string
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Server status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /api/v1/auth/register:
+    post:
+      summary: Register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, email, password]
+              properties:
+                fullName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Auth info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/v1/auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Auth info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /api/v1/uploads/excel:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Upload Excel
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Upload result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  excelId:
+                    type: string
+                    format: uuid
+                  metadata:
+                    type: object
+  /api/v1/sheets/{excelId}:
+    get:
+      security:
+        - bearerAuth: []
+      summary: List sheets
+      parameters:
+        - in: path
+          name: excelId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workbook metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sheets:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Sheet"
+  /api/v1/sheets/{excelId}/{sheetName}:
+    get:
+      security:
+        - bearerAuth: []
+      summary: Fetch rows
+      parameters:
+        - in: path
+          name: excelId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetName
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Sheet rows
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rows:
+                    type: array
+                    items:
+                      type: object
+  /api/v1/sheets/{excelId}/{sheetName}/rows:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Add row
+      parameters:
+        - in: path
+          name: excelId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Updated rows
+  /api/v1/sheets/{excelId}/{sheetName}/rows/{rowId}:
+    put:
+      security:
+        - bearerAuth: []
+      summary: Update row
+      parameters:
+        - in: path
+          name: excelId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: rowId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Updated rows
+    delete:
+      security:
+        - bearerAuth: []
+      summary: Delete row
+      parameters:
+        - in: path
+          name: excelId
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: sheetName
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: rowId
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated rows
+  /api/v1/repos:
+    get:
+      security:
+        - bearerAuth: []
+      summary: List published repos
+      responses:
+        "200":
+          description: Repo list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repos:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Repo"
+  /api/v1/repos/{excelId}/publish:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Publish dashboard to GitHub
+      parameters:
+        - in: path
+          name: excelId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Repo metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  repo:
+                    $ref: "#/components/schemas/Repo"
