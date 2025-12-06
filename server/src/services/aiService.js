@@ -807,7 +807,7 @@ Copy the token value and use it in step 3 below.
 2. Copy \`.env.example\` to \`.env\`
 3. **REQUIRED:** Paste your JWT token into \`VITE_EXODIA_AUTH_TOKEN\` in the \`.env\` file
 4. Install dependencies: \`npm install\`
-5. Start the dev server: \`npm run dev\` (defaults to <http://localhost:5173>)
+5. Start the dev server: \`npm run dev\` (defaults to <http://localhost:5432>)
 
 Without a valid token, you'll get "Unauthorized" errors when the dashboard tries to fetch data.
 
@@ -937,7 +937,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: '0.0.0.0',
-    port: 5173,
+    port: 5432,
   },
   preview: {
     host: '0.0.0.0',
