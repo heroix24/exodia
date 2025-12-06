@@ -485,7 +485,7 @@ export default function CrudControls({ sheet, excelId, apiBaseUrl, authToken, on
 
 const buildReadme = (metadata) => `# Exodia Dashboard
 
-This repository was generated automatically from your Excel upload. It contains a React dashboard (with full CRUD controls) that can be embedded inside a Next.js application.
+This repository was generated automatically from your Excel upload. It contains a React dashboard (with full CRUD controls) plus a ready-to-run Vite scaffold so you can preview it instantly or embed the main component inside another app.
 
 ## Workbook
 
@@ -495,17 +495,26 @@ ${metadata.sheets
   .map((sheet) => `  - ${sheet.label} (${sheet.rowCount} rows)`)
   .join("\n")}
 
-## Getting Started
+## Repo Layout
 
-1. Install dependencies (e.g. \`npm install\`).
-2. Import \`Dashboard.jsx\` into your Next.js route.
+- \`package.json\` — Vite + React dependencies and scripts.
+- \`index.html\`, \`src/main.jsx\`, \`src/App.jsx\` — local dev entrypoint.
+- \`Dashboard.jsx\` + \`components/*\` — the generated dashboard + CRUD widgets.
+- \`metadata.json\` — workbook schema snapshot.
+- \`.env.example\` — optional API base + auth token overrides.
+
+## Run Locally (Vite)
+
+1. Copy \`.env.example\` to \`.env\` (fill in \`VITE_EXODIA_AUTH_TOKEN\` with a JWT from \`POST /api/v1/auth/login\` if you want CRUD to be authenticated).
+2. Install dependencies with \`npm install\`.
+3. Start the dev server via \`npm run dev\` (defaults to <http://localhost:5173>).
+4. The dashboard reads \`VITE_EXODIA_API_BASE\` (falls back to \`http://localhost:8000/api/v1\`).
+
+## Embedding into Next.js (optional)
+
+1. Copy \`Dashboard.jsx\`, \`components/*\`, and \`metadata.json\` into your Next.js project.
+2. Import the component in any route: \`import Dashboard from "./Dashboard";\`
 3. Render \`<Dashboard apiBaseUrl={process.env.NEXT_PUBLIC_EXODIA_API_BASE} authToken={token} />\`.
-
-## Configuration
-
-- The dashboard defaults to \`http://localhost:8000/api/v1\`. Override via the \`apiBaseUrl\` prop or \`NEXT_PUBLIC_EXODIA_API_BASE\`.
-- Pass a valid JWT (from \`POST /api/v1/auth/login\`) via the \`authToken\` prop so requests include \`Authorization: Bearer <token>\`.
-- Metadata for this workbook (including schema + Excel ID) is stored in \`metadata.json\`.
 
 ## CRUD controls
 
@@ -520,6 +529,98 @@ Successful responses update the in-memory rows so the table stays in sync withou
 `;
 
 const buildMetadataJson = (metadata) => JSON.stringify(metadata, null, 2);
+
+const buildPackageJson = () =>
+  JSON.stringify(
+    {
+      name: "exodia-dashboard",
+      version: "0.1.0",
+      private: true,
+      type: "module",
+      scripts: {
+        dev: "vite",
+        build: "vite build",
+        preview: "vite preview",
+      },
+      dependencies: {
+        react: "^18.3.1",
+        "react-dom": "^18.3.1",
+      },
+      devDependencies: {
+        "@vitejs/plugin-react": "^4.2.1",
+        vite: "^5.4.8",
+      },
+    },
+    null,
+    2
+  );
+
+const buildEnvExample = () => `VITE_EXODIA_API_BASE=http://localhost:8000/api/v1
+VITE_EXODIA_AUTH_TOKEN=
+`;
+
+const buildGitignore = () => `node_modules
+dist
+.env
+.DS_Store
+`;
+
+const buildViteConfig = () => `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+  },
+  preview: {
+    host: '0.0.0.0',
+    port: 4173,
+  },
+});
+`;
+
+const buildIndexHtml = () => `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exodia Dashboard</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+`;
+
+const buildAppComponent = () => `import React from 'react';
+import Dashboard from '../Dashboard.jsx';
+
+const apiBaseUrl =
+  import.meta.env.VITE_EXODIA_API_BASE ?? 'http://localhost:8000/api/v1';
+const authToken = import.meta.env.VITE_EXODIA_AUTH_TOKEN ?? '';
+
+export default function App() {
+  return (
+    <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
+      <Dashboard apiBaseUrl={apiBaseUrl} authToken={authToken} />
+    </div>
+  );
+}
+`;
+
+const buildMainEntry = () => `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+`;
 
 const sanitizeJsonString = (value) => {
   if (!value) {
@@ -670,6 +771,13 @@ export const aiService = {
     }
 
     return {
+      "package.json": buildPackageJson(),
+      ".env.example": buildEnvExample(),
+      ".gitignore": buildGitignore(),
+      "vite.config.js": buildViteConfig(),
+      "index.html": buildIndexHtml(),
+      "src/main.jsx": buildMainEntry(),
+      "src/App.jsx": buildAppComponent(),
       "Dashboard.jsx": buildDashboardComponent(payload),
       "components/Table.jsx": buildTableComponent(),
       "components/Charts.jsx": buildChartsComponent(),
