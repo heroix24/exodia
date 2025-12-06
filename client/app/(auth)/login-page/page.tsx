@@ -73,7 +73,7 @@ export default function LoginPage() {
         login(token, user);
       }
 
-      router.push("/dashboard");
+      router.push("/projects");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unexpected error");
     } finally {

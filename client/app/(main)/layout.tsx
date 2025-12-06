@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Layout, Search } from "lucide-react";
 
 const primaryNav = [
   { label: "Search", icon: Search },
-  { label: "Projects", icon: Layout },
+  { label: "Projects", icon: Layout, href: "/projects" },
 ];
 
 export default function MainLayout({
@@ -26,7 +27,7 @@ export default function MainLayout({
           variant="outline"
           className="w-full justify-start rounded-lg border border-slate-200 text-slate-700"
         >
-          <span className="mr-2">+</span> New Chat
+          <span className="mr-2">+</span> New Sheets
         </Button>
 
         <nav className="space-y-6 text-sm">
@@ -35,7 +36,7 @@ export default function MainLayout({
               <a
                 key={item.label}
                 className="flex items-center gap-3 rounded-md px-2 py-2 text-slate-700 hover:bg-slate-100"
-                href="#"
+                href={item.href}
               >
                 <item.icon className="h-4 w-4 text-slate-500" />
                 {item.label}
@@ -49,7 +50,22 @@ export default function MainLayout({
         </nav>
       </aside>
 
-      {children}
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="flex items-center justify-end gap-3 border-b border-slate-100 px-6 py-4">
+          <Button variant="outline" className="rounded-lg border-slate-200">
+            Upgrade
+          </Button>
+          <Button variant="outline" className="rounded-lg border-slate-200">
+            Feedback
+          </Button>
+          <ProfileDropdown />
+        </header>
+
+        {/* Page content */}
+        {children}
+      </div>
     </div>
   );
 }

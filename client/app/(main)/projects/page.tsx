@@ -8,7 +8,6 @@ import {
   ImageIcon,
   Upload,
 } from "lucide-react";
-import { ProfileDropdown } from "@/components/profile-dropdown";
 
 const quickActions = [
   { label: "Clone a Screenshot", icon: ImageIcon },
@@ -41,37 +40,15 @@ const communityCards = [
 
 export default function DashboardPage() {
   return (
-    <main className="flex-1 flex flex-col">
-      <header className="flex items-center justify-end gap-3 border-b border-slate-100 px-6 py-4">
-        <Button variant="outline" className="rounded-lg border-slate-200">
-          Upgrade
-        </Button>
-        <Button variant="outline" className="rounded-lg border-slate-200">
-          Feedback
-        </Button>
-        <ProfileDropdown />
-      </header>
-
-      <section className="flex-1 overflow-auto px-4 pb-10">
+    <main className="flex-1 flex flex-col overflow-auto px-4 pb-10">
+      <section className="flex-1">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 pt-8 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-600">
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
-              New
-            </span>
-            Edit faster with Design Mode
-            <span className="text-emerald-600">Try it now</span>
-          </div>
-
           <div className="space-y-4">
             <h1 className="text-4xl font-bold">What can I help you build?</h1>
 
             <div className="w-full">
               <div className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
                 <AudioLines className="h-5 w-5 text-emerald-600" />
-                <input
-                  className="flex-1 border-none bg-transparent text-slate-700 outline-none placeholder:text-slate-400"
-                  placeholder="Ask v0 to build..."
-                />
                 <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600">
                   v0-1.5-md
                   <ChevronDown className="h-4 w-4" />
