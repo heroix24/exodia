@@ -1,4 +1,7 @@
+"use client";
+
 import { PricingCard } from "./pricing-card";
+import { motion } from "motion/react";
 
 const pricingPlans = [
   {
@@ -54,19 +57,35 @@ export function PricingSection() {
   return (
     <section className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
       <div className="flex flex-col gap-4 md:gap-5 items-center">
-        <p className="text-[#0d7239] text-base md:text-lg font-medium uppercase tracking-wide">
+        <motion.p
+          className="text-[#0d7239] text-base md:text-lg font-medium uppercase tracking-wide"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
           Pricing
-        </p>
-        <h2
+        </motion.p>
+        <motion.h2
           className="text-2xl md:text-4xl font-bold text-center"
           style={{ fontFamily: "'Edu TAS Beginner', cursive" }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
         >
           Simple, Transparent Pricing
-        </h2>
-        <p className="text-[#424242]/70 text-sm md:text-base text-center">
+        </motion.h2>
+        <motion.p
+          className="text-[#424242]/70 text-sm md:text-base text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
           Choose the plan that fits your needs. Start free, upgrade when
           you&apos;re ready.
-        </p>
+        </motion.p>
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-center lg:items-start justify-center mt-6 w-full">
           {pricingPlans.map((plan, index) => (
@@ -79,6 +98,7 @@ export function PricingSection() {
               features={plan.features}
               cta={plan.cta}
               highlighted={plan.highlighted}
+              index={index}
             />
           ))}
         </div>
@@ -86,4 +106,3 @@ export function PricingSection() {
     </section>
   );
 }
-

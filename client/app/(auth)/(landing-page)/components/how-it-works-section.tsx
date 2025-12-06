@@ -2,30 +2,30 @@ import { FeatureCard } from "./feature-card";
 
 const howItWorks = [
   {
-    title: "File Duplicate Check",
-    description: "Excel files multiplied, renamed, and fragmented across teams",
+    title: "Upload Your Excel",
+    description: "Simply drag and drop your spreadsheet file to get started",
   },
   {
-    title: "Formula Breakage Fear",
-    description: "Afraid to share or edit files due to formula destruction",
+    title: "AI Analyzes Structure",
+    description: "Our AI understands your data, formulas, and relationships",
   },
   {
-    title: "No Developer Access",
-    description: "Can't afford or access developers to build proper tools",
+    title: "Generate Components",
+    description: "Automatically create forms, tables, and dashboards",
   },
   {
-    title: "Manual Time Waste",
-    description: "Hours spent on manual data entry and updates",
+    title: "Deploy Instantly",
+    description: "Your web app is live and ready to share with your team",
   },
   {
-    title: "File Duplicate Chaos",
-    description: "Excel files outdated, misused, and dispersed across environments",
+    title: "Iterate & Improve",
+    description: "Make changes and see updates in real-time",
   },
 ];
 
 export function HowItWorksSection() {
   return (
-    <section className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
+    <section className="border-b border-l border-r border-dashed border-[rgba(13,114,57,0.5)] mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
       <div className="flex flex-col gap-4 md:gap-5 items-center">
         <p className="text-[#0d7239] text-base md:text-lg font-medium uppercase tracking-wide">
           How It Works
@@ -51,7 +51,7 @@ export function HowItWorksSection() {
         </div>
 
         {/* Fifth step centered */}
-        <div className="w-full sm:w-[calc(50%-6px)] mx-auto">
+        <div className="w-full sm:w-[437px]">
           <FeatureCard
             title={howItWorks[4].title}
             description={howItWorks[4].description}
