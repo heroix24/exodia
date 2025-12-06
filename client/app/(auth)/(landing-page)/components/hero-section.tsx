@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Safari } from "@/components/ui/safari";
+import Link from "next/link";
 import { motion } from "motion/react";
 
 export function HeroSection() {
@@ -62,9 +63,12 @@ export function HeroSection() {
               },
             }}
           >
-            <Button className="w-full sm:w-fit mx-auto lg:mx-0 bg-[#0d7239] px-4 py-4 text-sm md:text-base font-semibold text-[#fff6ed] hover:bg-[#0a5c2d]">
+            <Link
+              className="rounded-lg w-full sm:w-fit mx-auto lg:mx-0 bg-[#0d7239] px-4 py-4 text-sm md:text-base font-semibold text-[#fff6ed] hover:bg-[#0a5c2d]"
+              href="/register-page"
+            >
               Start Convert Sheets
-            </Button>
+            </Link>
           </motion.div>
         </motion.div>
         <motion.div

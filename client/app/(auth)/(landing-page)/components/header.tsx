@@ -8,10 +8,10 @@ import { Logo } from "./logo";
 import { motion, AnimatePresence } from "motion/react";
 
 const navItems = [
-  { href: "#", label: "Home" },
-  { href: "#", label: "Product" },
-  { href: "#", label: "Features" },
-  { href: "#", label: "Pricing" },
+  { href: "#top", label: "Home" },
+  { href: "#how-it-works", label: "Product" },
+  { href: "#features", label: "Features" },
+  { href: "#pricing", label: "Pricing" },
 ];
 
 export function Header() {
@@ -56,14 +56,16 @@ export function Header() {
           className="flex items-center gap-3 md:gap-4"
         >
           <Link
-            href="#"
+            href="/login-page"
             className="hidden text-sm text-[#424242]/70 transition-colors hover:text-[#0d7239] md:inline"
           >
             Sign In
           </Link>
-          <Button className="hidden bg-[#0d7239] px-4 py-2 text-sm font-semibold text-[#fff6ed] hover:bg-[#0a5c2d] md:inline-flex">
-            Get Started
-          </Button>
+          <Link href="/register-page">
+            <Button className="hidden bg-[#0d7239] px-4 py-2 text-sm font-semibold text-[#fff6ed] hover:bg-[#0a5c2d] md:inline-flex">
+              Get Started
+            </Button>
+          </Link>
           <button
             className="md:hidden p-2 text-[#0d7239]"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -89,7 +91,7 @@ export function Header() {
             className="md:hidden bg-[#fff6ed] border-t border-[#0d7239]/20 overflow-hidden"
           >
             <nav className="flex flex-col gap-4 px-4 py-4">
-              {[...navItems, { href: "#", label: "Sign In" }].map(
+              {[...navItems, { href: "/login-page", label: "Sign In" }].map(
                 (item, index) => (
                   <motion.div
                     key={item.label}
@@ -112,9 +114,11 @@ export function Header() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25, duration: 0.3 }}
               >
-                <Button className="w-full bg-[#0d7239] px-4 py-2 text-sm font-semibold text-[#fff6ed] hover:bg-[#0a5c2d]">
-                  Get Started
-                </Button>
+                <Link href="/register-page">
+                  <Button className="w-full bg-[#0d7239] px-4 py-2 text-sm font-semibold text-[#fff6ed] hover:bg-[#0a5c2d]">
+                    Get Started
+                  </Button>
+                </Link>
               </motion.div>
             </nav>
           </motion.div>

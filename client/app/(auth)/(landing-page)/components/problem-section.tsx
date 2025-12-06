@@ -32,7 +32,7 @@ const problems = [
 
 export function ProblemSection() {
   return (
-    <section className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
+    <section id="features" className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
       <div className="flex flex-col gap-4 md:gap-5 items-center">
         <motion.p
           className="text-[#0d7239] text-base md:text-lg font-medium uppercase tracking-wide"

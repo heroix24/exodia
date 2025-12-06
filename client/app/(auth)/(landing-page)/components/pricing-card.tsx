@@ -27,11 +27,11 @@ export function PricingCard({
 }: PricingCardProps) {
   return (
     <motion.div
-      className={`relative flex flex-col justify-between rounded-lg ${
+      className={`relative flex flex-col justify-between rounded-lg h-full ${
         highlighted
-          ? "border-2 border-[#0d7239] order-first lg:order-none"
+          ? "border-2 border-[#0d7239]"
           : "border border-[#c8c8c8]"
-      } bg-[#fff6ed] px-4 md:px-5 py-6 md:py-8 w-full max-w-[320px] lg:w-[274px]`}
+      } bg-[#fff6ed] px-4 md:px-5 py-6 md:py-8 w-full max-w-[320px]`}
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
@@ -62,7 +62,7 @@ export function PricingCard({
           </div>
         </motion.div>
       )}
-      <div className="flex flex-col gap-4 md:gap-5">
+      <div className="flex flex-col gap-4 md:gap-5 flex-1">
         <motion.p
           className="text-base font-medium text-[#0d7239]"
           initial={{ opacity: 0 }}
@@ -98,7 +98,7 @@ export function PricingCard({
         >
           {description}
         </motion.p>
-        <div className="flex flex-col gap-3 md:gap-5">
+        <div className="flex flex-col gap-3 md:gap-5 flex-1">
           {features.map((feature, featureIndex) => (
             <motion.p
               key={featureIndex}

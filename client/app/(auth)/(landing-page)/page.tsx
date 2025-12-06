@@ -16,15 +16,15 @@ import {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#fff6ed] text-[#424242]">
+    <div id="top" className="min-h-screen bg-[#fff6ed] text-[#424242]">
       <Header />
       <HeroSection />
       <WaveDivider />
-      <ProblemSection />
+      <HowItWorksSection />
       <WaveDivider />
       <TransformSection />
       <WaveDivider />
-      <HowItWorksSection />
+      <ProblemSection />
       <WaveDivider />
       <TestimonialSection
         quote="Working with this team changed the way we think about pricing and growth. We saw clarity, speed and real revenue movement within weeks."

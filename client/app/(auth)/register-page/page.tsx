@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const GoogleIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M19.6 10.23c0-.68-.06-1.35-.18-2H10v3.78h5.36c-.23 1.2-.93 2.22-1.98 2.9v2.4h3.2c1.87-1.73 2.98-4.28 2.98-7.08Z"
       fill="#4285F4"
@@ -30,7 +36,8 @@ const GoogleIcon = () => (
 );
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
+  "http://localhost:8000/api/v1";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -97,7 +104,7 @@ export default function RegisterPage() {
         />
         <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
         <Link
-          href="/landing-page"
+          href="/"
           className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-md bg-[#1d6b43] px-4 py-2 text-sm font-medium text-white shadow-lg transition hover:bg-[#155533]"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -108,7 +115,9 @@ export default function RegisterPage() {
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-xl space-y-10">
           <div className="space-y-3 text-center">
-            <h1 className="text-4xl font-semibold text-[#1b5f3b]">Create your account</h1>
+            <h1 className="text-4xl font-semibold text-[#1b5f3b]">
+              Create your account
+            </h1>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -130,7 +139,9 @@ export default function RegisterPage() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#1a3d2e]">Full Name</label>
+              <label className="text-sm font-medium text-[#1a3d2e]">
+                Full Name
+              </label>
               <Input
                 type="text"
                 name="fullName"
@@ -144,7 +155,9 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#1a3d2e]">Email Address</label>
+              <label className="text-sm font-medium text-[#1a3d2e]">
+                Email Address
+              </label>
               <Input
                 type="email"
                 name="email"
@@ -158,7 +171,9 @@ export default function RegisterPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#1a3d2e]">Password</label>
+                <label className="text-sm font-medium text-[#1a3d2e]">
+                  Password
+                </label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -174,15 +189,23 @@ export default function RegisterPage() {
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
                     className="absolute inset-y-0 right-3 flex items-center text-[#1a3d2e]/70 hover:text-[#1a5f3c]"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#1a3d2e]">Confirm Password</label>
+                <label className="text-sm font-medium text-[#1a3d2e]">
+                  Confirm Password
+                </label>
                 <div className="relative">
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
@@ -198,16 +221,28 @@ export default function RegisterPage() {
                     type="button"
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
                     className="absolute inset-y-0 right-3 flex items-center text-[#1a3d2e]/70 hover:text-[#1a5f3c]"
-                    aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }
                   >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
             </div>
 
             {error && (
-              <p className="text-sm text-red-600" role="alert" aria-live="polite">
+              <p
+                className="text-sm text-red-600"
+                role="alert"
+                aria-live="polite"
+              >
                 {error}
               </p>
             )}
@@ -223,7 +258,10 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-[#1a3d2e]/70">
             Already have an account?{" "}
-            <Link href="/login-page" className="font-medium text-[#1a5f3c] hover:underline">
+            <Link
+              href="/login-page"
+              className="font-medium text-[#1a5f3c] hover:underline"
+            >
               Sign in
             </Link>
           </p>
@@ -232,4 +270,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-

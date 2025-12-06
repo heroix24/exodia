@@ -25,7 +25,7 @@ const howItWorks = [
 
 export function HowItWorksSection() {
   return (
-    <section className="border-b border-l border-r border-dashed border-[rgba(13,114,57,0.5)] mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
+    <section id="how-it-works" className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
       <div className="flex flex-col gap-4 md:gap-5 items-center">
         <p className="text-[#0d7239] text-base md:text-lg font-medium uppercase tracking-wide">
           How It Works

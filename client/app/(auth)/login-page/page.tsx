@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Eye, EyeOff, Github } from "lucide-react";
 
 const GoogleIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    aria-hidden="true"
+  >
     <path
       d="M19.6 10.23c0-.68-.06-1.35-.18-2H10v3.78h5.36c-.23 1.2-.93 2.22-1.98 2.9v2.4h3.2c1.87-1.73 2.98-4.28 2.98-7.08Z"
       fill="#4285F4"
@@ -29,7 +35,8 @@ const GoogleIcon = () => (
 );
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000/api/v1";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
+  "http://localhost:8000/api/v1";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -86,7 +93,7 @@ export default function LoginPage() {
         />
         <div className="absolute inset-0 bg-black/10 mix-blend-multiply" />
         <Link
-          href="/landing-page"
+          href="/"
           className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-md bg-[#1d6b43] px-4 py-2 text-sm font-medium text-white shadow-lg transition hover:bg-[#155533]"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -97,7 +104,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-8">
           <div className="space-y-3 text-center">
-            <h1 className="text-3xl font-semibold text-[#1b5f3b]">Welcome back</h1>
+            <h1 className="text-3xl font-semibold text-[#1b5f3b]">
+              Welcome back
+            </h1>
             <p className="text-sm text-[#1a3d2e]/70">
               Sign in to your account to continue your journey with FlowT
             </p>
@@ -122,7 +131,9 @@ export default function LoginPage() {
 
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[#1a3d2e]">Email</label>
+              <label className="text-sm font-medium text-[#1a3d2e]">
+                Email
+              </label>
               <Input
                 type="email"
                 name="email"
@@ -158,13 +169,21 @@ export default function LoginPage() {
                   className="absolute inset-y-0 right-3 flex items-center text-[#1a3d2e]/70 hover:text-[#1a5f3c]"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             {error && (
-              <p className="text-sm text-red-600" role="alert" aria-live="polite">
+              <p
+                className="text-sm text-red-600"
+                role="alert"
+                aria-live="polite"
+              >
                 {error}
               </p>
             )}
@@ -180,7 +199,10 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-[#1a3d2e]/70">
             Don&apos;t have an account?{" "}
-            <Link href="/register-page" className="font-medium text-[#1a5f3c] hover:underline">
+            <Link
+              href="/register-page"
+              className="font-medium text-[#1a5f3c] hover:underline"
+            >
               Sign up
             </Link>
           </p>
@@ -189,4 +211,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

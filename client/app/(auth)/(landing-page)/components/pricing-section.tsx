@@ -55,7 +55,10 @@ const pricingPlans = [
 
 export function PricingSection() {
   return (
-    <section className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8">
+    <section
+      id="pricing"
+      className="mx-4 md:mx-auto max-w-[1000px] overflow-hidden px-4 md:px-5 py-6 md:py-8"
+    >
       <div className="flex flex-col gap-4 md:gap-5 items-center">
         <motion.p
           className="text-[#0d7239] text-base md:text-lg font-medium uppercase tracking-wide"
@@ -87,7 +90,7 @@ export function PricingSection() {
           you&apos;re ready.
         </motion.p>
 
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-center lg:items-start justify-center mt-6 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10 justify-items-center mt-6 w-full">
           {pricingPlans.map((plan, index) => (
             <PricingCard
               key={index}
