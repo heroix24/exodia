@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Exodia API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     REST API for uploading Excel files, generating dashboards, and exposing CRUD capabilities.
 servers:
@@ -70,6 +70,29 @@ components:
           type: array
           items:
             type: object
+    NetlifyDeployment:
+      type: object
+      properties:
+        siteId:
+          type: string
+          description: Netlify site ID
+        siteName:
+          type: string
+          description: Netlify site name/subdomain
+        siteUrl:
+          type: string
+          format: uri
+          description: Full URL of the deployed Netlify site
+        deployId:
+          type: string
+          description: Netlify deploy ID
+        deployUrl:
+          type: string
+          format: uri
+          description: URL of this specific deployment
+        error:
+          type: string
+          description: Error message if deployment failed
     Repo:
       type: object
       properties:
@@ -114,6 +137,12 @@ components:
             - `sunset`: Warm orange and amber tones
             - `monochrome`: Strict black and white theme
             - `gradient`: Purple gradient background with white cards
+        netlifySiteUrl:
+          type: string
+          format: uri
+          description: URL of the deployed Netlify site (if deployed)
+        netlify:
+          $ref: "#/components/schemas/NetlifyDeployment"
 paths:
   /health:
     get:
@@ -379,12 +408,110 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Repo"
+  /api/v1/repos/create:
+    post:
+      security:
+        - bearerAuth: []
+      summary: Create and deploy new app
+      description: |
+        Combined endpoint that accepts file upload and credentials in a single request.
+        This uploads the Excel file, generates a dashboard using AI, publishes to GitHub,
+        and deploys to Netlify - all in one operation.
+      tags:
+        - Repos
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, appName, githubToken, netlifyKey]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Excel (.xlsx) or CSV (.csv) file to process
+                appName:
+                  type: string
+                  description: Name for the app (used for GitHub repo name and Netlify site)
+                  example: my-sales-dashboard
+                githubToken:
+                  type: string
+                  description: GitHub Personal Access Token with repo permissions
+                  example: ghp_xxxxxxxxxxxxxxxxxxxx
+                netlifyKey:
+                  type: string
+                  description: Netlify API key for deployment
+                prompt:
+                  type: string
+                  description: Additional instructions to forward to the AI generator
+                theme:
+                  type: string
+                  enum:
+                    [
+                      light,
+                      dark,
+                      corporate,
+                      minimal,
+                      vibrant,
+                      oceanic,
+                      forest,
+                      sunset,
+                      monochrome,
+                      gradient,
+                    ]
+                  default: light
+                  description: Visual theme for the generated dashboard
+      responses:
+        "200":
+          description: App created and deployed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: App created and deployed successfully
+                  data:
+                    type: object
+                    properties:
+                      repo:
+                        $ref: "#/components/schemas/Repo"
+                      excelId:
+                        type: string
+                        format: uuid
+                        description: ID of the uploaded Excel file
+                      generator:
+                        type: string
+                        description: Which generator created the files (openai, claude, template)
+                      generatorReason:
+                        type: string
+                        description: Additional context when template fallback is used
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: App name is required
   /api/v1/repos/{excelId}/publish:
     post:
       security:
         - bearerAuth: []
       summary: Publish dashboard to GitHub
-      description: Enriches the Excel workbook data, generates a dashboard via aiService, and publishes the files to the configured GitHub repository.
+      description: |
+        Enriches the Excel workbook data, generates a dashboard via aiService, 
+        and publishes the files to GitHub. Optionally deploys to Netlify if credentials provided.
       tags:
         - Repos
       parameters:
@@ -419,21 +546,20 @@ paths:
                       gradient,
                     ]
                   default: light
-                  description: |
-                    Visual theme for the generated dashboard:
-                    - `light`: Clean white background with blue accents
-                    - `dark`: Dark slate background with light blue accents
-                    - `corporate`: Professional blue theme for business dashboards
-                    - `minimal`: Minimal grayscale design with subtle borders
-                    - `vibrant`: Bold warm colors with amber and pink accents
-                    - `oceanic`: Cool cyan and turquoise color palette
-                    - `forest`: Fresh green theme inspired by nature
-                    - `sunset`: Warm orange and amber tones
-                    - `monochrome`: Strict black and white theme
-                    - `gradient`: Purple gradient background with white cards
+                  description: Visual theme for the generated dashboard
+                appName:
+                  type: string
+                  description: Custom name for the GitHub repo (optional, auto-generated if not provided)
+                githubToken:
+                  type: string
+                  description: User's GitHub PAT (optional, falls back to server env var)
+                netlifyKey:
+                  type: string
+                  description: Netlify API key for deployment (optional)
             example:
               prompt: "Prioritize KPIs for the sales leadership deck."
               theme: "corporate"
+              appName: "sales-dashboard"
       responses:
         "200":
           description: Repo metadata
