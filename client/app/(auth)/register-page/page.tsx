@@ -83,7 +83,7 @@ export default function RegisterPage() {
         localStorage.setItem("exodia_user", JSON.stringify(user));
       }
 
-      router.push("/landing-page");
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unexpected error");
     } finally {
