@@ -18,6 +18,7 @@ const ddlStatements = [
     github_repo_name TEXT NOT NULL,
     github_repo_url TEXT NOT NULL,
     github_branch TEXT NOT NULL DEFAULT 'main',
+    theme TEXT NOT NULL DEFAULT 'light',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`,

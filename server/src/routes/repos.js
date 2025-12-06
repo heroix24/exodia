@@ -4,6 +4,7 @@ import { excelService } from "../services/excelService.js";
 import { aiService } from "../services/aiService.js";
 import { repoService } from "../services/repoService.js";
 import { success } from "../utils/http.js";
+import { normalizeTheme } from "../utils/themes.js";
 
 /**
  * repoRoutes exposes authenticated endpoints for listing repos and publishing
@@ -27,6 +28,7 @@ repoRoutes.post("/:excelId/publish", async (c) => {
     typeof body?.prompt === "string" && body.prompt.trim().length > 0
       ? body.prompt.trim()
       : undefined;
+  const theme = normalizeTheme(body?.theme);
   const metadata = await excelService.listSheets({ userId: user.id, excelId });
 
   const sheetsWithRows = await Promise.all(
@@ -45,8 +47,13 @@ repoRoutes.post("/:excelId/publish", async (c) => {
     files,
     source: generator,
     reason: generatorReason,
-  } = await aiService.generateDashboard(enrichedMetadata, { prompt });
-  const record = await repoService.publish({ userId: user.id, excelId, files });
+  } = await aiService.generateDashboard(enrichedMetadata, { prompt, theme });
+  const record = await repoService.publish({
+    userId: user.id,
+    excelId,
+    files,
+    theme,
+  });
 
   return c.json(
     success({ repo: record, generator, generatorReason }, "Repo published")

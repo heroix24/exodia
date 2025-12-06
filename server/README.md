@@ -134,7 +134,7 @@ The compose file uses the `pgvector/pgvector:pg18-trixie` image and stores data 
 - `POST /api/v1/sheets/:excelId/:sheetName/rows`
 - `PUT /api/v1/sheets/:excelId/:sheetName/rows/:rowId`
 - `DELETE /api/v1/sheets/:excelId/:sheetName/rows/:rowId`
-- `POST /api/v1/repos/:excelId/publish` (optional JSON body `{ "prompt": "Describe the dashboard you'd like" }` → prompt text is appended to the AI brief verbatim; response payload also includes `generator` plus `generatorReason` so you can see whether OpenAI, Claude, or the static template handled the request and why. Set `OPENAI_API_KEY` or `CLAUDE_API_KEY` to avoid falling back to the template.)
+- `POST /api/v1/repos/:excelId/publish` (optional JSON body `{ "prompt": "Describe the dashboard you'd like", "theme": "corporate" }` → Uses OpenAI or Claude to generate dashboard code. Falls back to template if AI fails. Response includes `generator` (openai/claude/template) and `generatorReason` to show what happened.)
 - `GET /api/v1/repos`
 
 All mutating routes require `Authorization: Bearer <token>` headers.

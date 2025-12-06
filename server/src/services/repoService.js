@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { db, hasDatabase } from "../config/db.js";
 import { env } from "../env.js";
 import { log } from "../utils/logger.js";
+import { normalizeTheme } from "../utils/themes.js";
 
 const memoryRepos = new Map();
 
@@ -22,12 +23,13 @@ const persistRepo = async (record) => {
   if (hasDatabase) {
     try {
       await db.query(
-        `INSERT INTO repo (id, user_id, excel_id, github_repo_name, github_repo_url, github_branch, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+        `INSERT INTO repo (id, user_id, excel_id, github_repo_name, github_repo_url, github_branch, theme, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
          ON CONFLICT (excel_id)
          DO UPDATE SET github_repo_name = EXCLUDED.github_repo_name,
                        github_repo_url = EXCLUDED.github_repo_url,
                        github_branch = EXCLUDED.github_branch,
+                       theme = EXCLUDED.theme,
                        updated_at = NOW()`,
         [
           record.id,
@@ -36,6 +38,7 @@ const persistRepo = async (record) => {
           record.repoName,
           record.repoUrl,
           record.branch,
+          record.theme,
         ]
       );
       return;
@@ -54,7 +57,7 @@ const listFromStore = async (userId) => {
   if (hasDatabase) {
     try {
       const result = await db.query(
-        'SELECT id, user_id AS "userId", excel_id AS "excelId", github_repo_name AS "repoName", github_repo_url AS "repoUrl", github_branch AS "branch", created_at AS "createdAt", updated_at AS "updatedAt" FROM repo WHERE user_id = $1 ORDER BY created_at DESC',
+        'SELECT id, user_id AS "userId", excel_id AS "excelId", github_repo_name AS "repoName", github_repo_url AS "repoUrl", github_branch AS "branch", theme, created_at AS "createdAt", updated_at AS "updatedAt" FROM repo WHERE user_id = $1 ORDER BY created_at DESC',
         [userId]
       );
       return result.rows;
@@ -90,7 +93,7 @@ const fetchExistingSha = async (octokit, owner, repo, path) => {
 };
 
 export const repoService = {
-  async publish({ userId, excelId, files }) {
+  async publish({ userId, excelId, files, theme }) {
     const octokit = ensureOctokit();
     const { data: viewer } = await octokit.users.getAuthenticated();
     const repoName = `exodia-${userId.slice(0, 8)}-${excelId.slice(0, 8)}`;
@@ -142,6 +145,7 @@ export const repoService = {
       repoName,
       repoUrl: repoResponse.data.html_url,
       branch: repoResponse.data.default_branch || "main",
+      theme: normalizeTheme(theme),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

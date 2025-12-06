@@ -86,6 +86,34 @@ components:
           format: uri
         branch:
           type: string
+        theme:
+          type: string
+          enum:
+            [
+              light,
+              dark,
+              corporate,
+              minimal,
+              vibrant,
+              oceanic,
+              forest,
+              sunset,
+              monochrome,
+              gradient,
+            ]
+          default: light
+          description: |
+            Visual theme for the repository dashboard:
+            - `light`: Clean white background with blue accents
+            - `dark`: Dark slate background with light blue accents
+            - `corporate`: Professional blue theme for business dashboards
+            - `minimal`: Minimal grayscale design with subtle borders
+            - `vibrant`: Bold warm colors with amber and pink accents
+            - `oceanic`: Cool cyan and turquoise color palette
+            - `forest`: Fresh green theme inspired by nature
+            - `sunset`: Warm orange and amber tones
+            - `monochrome`: Strict black and white theme
+            - `gradient`: Purple gradient background with white cards
 paths:
   /health:
     get:
@@ -375,8 +403,37 @@ paths:
                 prompt:
                   type: string
                   description: Additional instructions to forward to the AI generator.
+                theme:
+                  type: string
+                  enum:
+                    [
+                      light,
+                      dark,
+                      corporate,
+                      minimal,
+                      vibrant,
+                      oceanic,
+                      forest,
+                      sunset,
+                      monochrome,
+                      gradient,
+                    ]
+                  default: light
+                  description: |
+                    Visual theme for the generated dashboard:
+                    - `light`: Clean white background with blue accents
+                    - `dark`: Dark slate background with light blue accents
+                    - `corporate`: Professional blue theme for business dashboards
+                    - `minimal`: Minimal grayscale design with subtle borders
+                    - `vibrant`: Bold warm colors with amber and pink accents
+                    - `oceanic`: Cool cyan and turquoise color palette
+                    - `forest`: Fresh green theme inspired by nature
+                    - `sunset`: Warm orange and amber tones
+                    - `monochrome`: Strict black and white theme
+                    - `gradient`: Purple gradient background with white cards
             example:
               prompt: "Prioritize KPIs for the sales leadership deck."
+              theme: "corporate"
       responses:
         "200":
           description: Repo metadata
@@ -392,4 +449,4 @@ paths:
                     description: Which generator created the files (openai, claude, template).
                   generatorReason:
                     type: string
-                    description: Additional context when the template fallback is used (e.g., missing_generator, openai_error: ...).
+                    description: "Additional context when the template fallback is used (e.g., missing_generator, openai_error: ...)."
