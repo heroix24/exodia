@@ -19,12 +19,31 @@ export interface SafariProps extends HTMLAttributes<HTMLDivElement> {
   url?: string
   imageSrc?: string
   videoSrc?: string
+  youtubeSrc?: string
   mode?: SafariMode
+}
+
+function getYouTubeEmbedUrl(src: string): string {
+  // Handle various YouTube URL formats
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/,
+    /^([a-zA-Z0-9_-]{11})$/, // Direct video ID
+  ]
+  
+  for (const pattern of patterns) {
+    const match = src.match(pattern)
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&playlist=${match[1]}&controls=0&showinfo=0&rel=0&modestbranding=1`
+    }
+  }
+  
+  return src // Return as-is if already an embed URL
 }
 
 export function Safari({
   imageSrc,
   videoSrc,
+  youtubeSrc,
   url,
   mode = "default",
   className,
@@ -32,7 +51,8 @@ export function Safari({
   ...props
 }: SafariProps) {
   const hasVideo = !!videoSrc
-  const hasMedia = hasVideo || !!imageSrc
+  const hasYoutube = !!youtubeSrc
+  const hasMedia = hasVideo || hasYoutube || !!imageSrc
 
   return (
     <div
@@ -43,7 +63,27 @@ export function Safari({
       }}
       {...props}
     >
-      {hasVideo && (
+      {hasYoutube && (
+        <div
+          className="pointer-events-none absolute z-0 overflow-hidden"
+          style={{
+            left: `${LEFT_PCT}%`,
+            top: `${TOP_PCT}%`,
+            width: `${WIDTH_PCT}%`,
+            height: `${HEIGHT_PCT}%`,
+          }}
+        >
+          <iframe
+            className="block size-full"
+            src={getYouTubeEmbedUrl(youtubeSrc)}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            style={{ border: 0 }}
+          />
+        </div>
+      )}
+
+      {!hasYoutube && hasVideo && (
         <div
           className="pointer-events-none absolute z-0 overflow-hidden"
           style={{
@@ -65,7 +105,7 @@ export function Safari({
         </div>
       )}
 
-      {!hasVideo && imageSrc && (
+      {!hasYoutube && !hasVideo && imageSrc && (
         <div
           className="pointer-events-none absolute z-0 overflow-hidden"
           style={{
