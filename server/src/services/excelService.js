@@ -108,18 +108,20 @@ export const excelService = {
   async ingest({ userId, file }) {
     if (!file) {
       const error = new Error(
-        'Excel file was not provided. Use the "file" form field.'
+        'File was not provided. Use the "file" form field.'
       );
       error.status = 400;
       throw error;
     }
 
-    if (
-      file.type &&
-      !file.name?.endsWith(".xls") &&
-      !file.name?.endsWith(".xlsx")
-    ) {
-      log.warn("Upload does not end with .xls/.xlsx, continuing anyway");
+    const fileName = file.name?.toLowerCase() ?? "";
+    const isCSV = fileName.endsWith(".csv");
+    const isExcel = fileName.endsWith(".xls") || fileName.endsWith(".xlsx");
+
+    if (!isCSV && !isExcel) {
+      log.warn("Upload is not .csv/.xls/.xlsx, continuing anyway", {
+        fileName,
+      });
     }
 
     const excelId = randomUUID();
@@ -129,14 +131,37 @@ export const excelService = {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    await fs.writeFile(workbookPath, buffer);
+    let workbook;
 
-    const workbook = xlsx.read(buffer, { type: "buffer" });
+    if (isCSV) {
+      // Convert CSV to XLSX
+      log.info("Converting CSV to XLSX", { fileName });
+
+      // Parse CSV content as string
+      const csvContent = buffer.toString("utf-8");
+
+      // Create a new workbook and add CSV data as a sheet
+      workbook = xlsx.utils.book_new();
+      const csvSheet = xlsx.read(csvContent, { type: "string" }).Sheets.Sheet1;
+
+      // Use filename (without .csv) as sheet name, or "Sheet1" as fallback
+      const sheetName = fileName.replace(/\.csv$/i, "") || "Sheet1";
+      xlsx.utils.book_append_sheet(workbook, csvSheet, sheetName);
+
+      // Write as XLSX
+      xlsx.writeFile(workbook, workbookPath);
+      log.info("CSV converted to XLSX successfully", { excelId, sheetName });
+    } else {
+      // Regular Excel file - save as-is
+      await fs.writeFile(workbookPath, buffer);
+      workbook = xlsx.read(buffer, { type: "buffer" });
+    }
+
     const metadata = buildMetadata(workbook);
     const metadataPath = getMetadataPath(userId, excelId);
     await writeJsonFile(metadataPath, metadata);
 
-    return { excelId, metadata };
+    return { excelId, fileName: file.name, convertedFromCSV: isCSV, metadata };
   },
 
   async listSheets({ userId, excelId }) {

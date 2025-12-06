@@ -4,8 +4,8 @@ import { excelService } from "../services/excelService.js";
 import { success } from "../utils/http.js";
 
 /**
- * uploadRoutes handles authenticated Excel file uploads before downstream
- * processing by excelService.
+ * uploadRoutes handles authenticated file uploads (Excel or CSV) before downstream
+ * processing by excelService. CSV files are automatically converted to XLSX.
  */
 export const uploadRoutes = new Hono();
 
@@ -18,5 +18,8 @@ uploadRoutes.post("/excel", async (c) => {
   const file = Array.isArray(fileInput) ? fileInput[0] : fileInput;
 
   const result = await excelService.ingest({ userId: user.id, file });
-  return c.json(success(result, "Excel uploaded"));
+  const message = result.convertedFromCSV 
+    ? "CSV converted to Excel and uploaded" 
+    : "Excel uploaded";
+  return c.json(success(result, message));
 });
