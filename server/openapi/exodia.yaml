@@ -365,6 +365,18 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: Additional instructions to forward to the AI generator.
+            example:
+              prompt: "Prioritize KPIs for the sales leadership deck."
       responses:
         "200":
           description: Repo metadata
@@ -375,3 +387,9 @@ paths:
                 properties:
                   repo:
                     $ref: "#/components/schemas/Repo"
+                  generator:
+                    type: string
+                    description: Which generator created the files (openai, claude, template).
+                  generatorReason:
+                    type: string
+                    description: Additional context when the template fallback is used (e.g., missing_generator, openai_error: ...).

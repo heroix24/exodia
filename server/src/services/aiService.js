@@ -622,6 +622,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 );
 `;
 
+const BASE_INSTRUCTION =
+  "Generate React dashboard files for this workbook metadata.";
+
 const sanitizeJsonString = (value) => {
   if (!value) {
     return null;
@@ -638,6 +641,57 @@ const sanitizeJsonString = (value) => {
   return trimmed;
 };
 
+const extractBalancedJson = (raw) => {
+  if (!raw) {
+    return null;
+  }
+  const start = raw.indexOf("{");
+  if (start === -1) {
+    return raw;
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = start; i < raw.length; i++) {
+    const char = raw[i];
+
+    if (escape) {
+      escape = false;
+      continue;
+    }
+
+    if (char === "\\") {
+      escape = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inString = !inString;
+      continue;
+    }
+
+    if (inString) {
+      continue;
+    }
+
+    if (char === "{") {
+      depth++;
+      continue;
+    }
+
+    if (char === "}") {
+      depth--;
+      if (depth === 0) {
+        return raw.slice(start, i + 1);
+      }
+    }
+  }
+
+  return raw.slice(start);
+};
+
 const parseFilesPayload = (raw) => {
   try {
     const cleaned = sanitizeJsonString(raw);
@@ -645,7 +699,8 @@ const parseFilesPayload = (raw) => {
       return null;
     }
 
-    const parsed = JSON.parse(cleaned);
+    const balanced = extractBalancedJson(cleaned);
+    const parsed = JSON.parse(balanced);
     if (parsed && typeof parsed.files === "object") {
       return parsed.files;
     }
@@ -655,9 +710,97 @@ const parseFilesPayload = (raw) => {
   return null;
 };
 
-const fromOpenAi = async (metadata) => {
+const collectTextSegments = (segments) => {
+  if (!Array.isArray(segments)) {
+    return [];
+  }
+
+  const result = [];
+
+  for (const segment of segments) {
+    if (!segment) {
+      continue;
+    }
+
+    if (typeof segment === "string") {
+      result.push(segment);
+      continue;
+    }
+
+    if (typeof segment.text === "string") {
+      result.push(segment.text);
+    }
+
+    if (Array.isArray(segment.content)) {
+      result.push(...collectTextSegments(segment.content));
+    }
+  }
+
+  return result;
+};
+
+const joinTextSegments = (segments) =>
+  segments
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+
+const previewText = (value, length = 400) => {
+  if (!value) {
+    return "n/a";
+  }
+  const trimmed = value.trim();
+  if (trimmed.length <= length) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, length)}…`;
+};
+
+const extractOpenAiText = (payload) => {
+  const choices = Array.isArray(payload?.choices) ? payload.choices : [];
+
+  for (const choice of choices) {
+    const content = choice?.message?.content;
+    if (content && typeof content === "string") {
+      return content.trim();
+    }
+  }
+
+  return undefined;
+};
+
+const extractClaudeText = (payload) =>
+  joinTextSegments(collectTextSegments(payload?.content));
+
+const normalizePrompt = (value) => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const buildPromptText = (metadata, prompt) => {
+  const sections = [
+    'You are Exodia, an AI that converts Excel metadata into React dashboards. Always respond with JSON shaped as {"files": {"path": "file contents"}} with no Markdown fences.',
+    `Task:\n${BASE_INSTRUCTION}`,
+  ];
+
+  if (prompt) {
+    sections.push(`User guidance:\n${prompt}`);
+  }
+
+  sections.push(
+    `Workbook metadata (JSON):\n${JSON.stringify(metadata, null, 2)}`
+  );
+
+  return sections.join("\n\n");
+};
+
+const fromOpenAi = async (metadata, prompt) => {
   try {
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -666,28 +809,18 @@ const fromOpenAi = async (metadata) => {
       body: JSON.stringify({
         model: env.OPENAI_MODEL,
         temperature: 0.2,
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "exodia_files",
-            schema: {
-              type: "object",
-              properties: {
-                files: {
-                  type: "object",
-                  additionalProperties: { type: "string" },
-                },
-              },
-              required: ["files"],
-              additionalProperties: false,
-            },
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content:
+              'You are Exodia, an AI that converts Excel metadata into React dashboards. Always respond with JSON: {"files": {"path": "file contents"}}.',
           },
-        },
-        input: JSON.stringify({
-          instruction:
-            "Generate React dashboard files for this workbook metadata.",
-          metadata,
-        }),
+          {
+            role: "user",
+            content: buildPromptText(metadata, prompt),
+          },
+        ],
       }),
     });
 
@@ -696,17 +829,25 @@ const fromOpenAi = async (metadata) => {
     }
 
     const payload = await response.json();
-    const text =
-      payload.output?.[0]?.content?.[0]?.text ??
-      payload.output?.[0]?.content?.[0]?.value;
-    return parseFilesPayload(text);
+    const text = extractOpenAiText(payload);
+    const files = parseFilesPayload(text);
+    if (!files) {
+      throw new Error(
+        `openai_error: empty response (preview: ${previewText(text)})`
+      );
+    }
+    return files;
   } catch (error) {
-    log.error("OpenAI generation failed, falling back to template", error);
-    return null;
+    log.error("OpenAI generation failed", error);
+    throw new Error(
+      error?.message?.startsWith("openai_error")
+        ? error.message
+        : `openai_error: ${error.message}`
+    );
   }
 };
 
-const fromClaude = async (metadata) => {
+const fromClaude = async (metadata, prompt) => {
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -717,7 +858,7 @@ const fromClaude = async (metadata) => {
       },
       body: JSON.stringify({
         model: env.CLAUDE_MODEL,
-        max_tokens: 4000,
+        max_tokens: 16000,
         temperature: 0.2,
         system:
           'You are Exodia, an AI that converts Excel metadata into React dashboards. Always respond with JSON: {"files": {"path": "file contents"}}.',
@@ -727,11 +868,7 @@ const fromClaude = async (metadata) => {
             content: [
               {
                 type: "text",
-                text: JSON.stringify({
-                  instruction:
-                    "Generate React dashboard files for this workbook metadata.",
-                  metadata,
-                }),
+                text: buildPromptText(metadata, prompt),
               },
             ],
           },
@@ -744,46 +881,79 @@ const fromClaude = async (metadata) => {
     }
 
     const payload = await response.json();
-    const text = payload.content?.[0]?.text;
-    return parseFilesPayload(text);
+    const text = extractClaudeText(payload);
+    const files = parseFilesPayload(text);
+    if (!files) {
+      throw new Error(
+        `claude_error: empty response (preview: ${previewText(text)})`
+      );
+    }
+    return files;
   } catch (error) {
-    log.error("Claude generation failed, falling back to template", error);
-    return null;
+    log.error("Claude generation failed", error);
+    throw new Error(
+      error?.message?.startsWith("claude_error")
+        ? error.message
+        : `claude_error: ${error.message}`
+    );
   }
 };
 
+const buildTemplateFiles = (payload) => ({
+  "package.json": buildPackageJson(),
+  ".env.example": buildEnvExample(),
+  ".gitignore": buildGitignore(),
+  "vite.config.js": buildViteConfig(),
+  "index.html": buildIndexHtml(),
+  "src/main.jsx": buildMainEntry(),
+  "src/App.jsx": buildAppComponent(),
+  "Dashboard.jsx": buildDashboardComponent(payload),
+  "components/Table.jsx": buildTableComponent(),
+  "components/Charts.jsx": buildChartsComponent(),
+  "components/CrudControls.jsx": buildCrudControlsComponent(),
+  "metadata.json": buildMetadataJson(payload),
+  "README.md": buildReadme(payload),
+});
+
 export const aiService = {
-  async generateDashboard(metadataWithRows) {
+  async generateDashboard(metadataWithRows, options = {}) {
     const payload = metadataWithRows;
+    const prompt = normalizePrompt(options.prompt);
+    let failureReason;
+
+    if (prompt && !featureFlags.aiGeneration) {
+      log.warn(
+        "Prompt provided for publish but no AI provider configured; using static template"
+      );
+      failureReason = "missing_generator";
+    }
 
     if (featureFlags.openai) {
-      const files = await fromOpenAi(payload);
-      if (files) {
-        return files;
+      try {
+        const files = await fromOpenAi(payload, prompt);
+        return { files, source: "openai" };
+      } catch (error) {
+        failureReason = error.message;
       }
     }
 
     if (featureFlags.claude) {
-      const files = await fromClaude(payload);
-      if (files) {
-        return files;
+      try {
+        const files = await fromClaude(payload, prompt);
+        return { files, source: "claude" };
+      } catch (error) {
+        failureReason = error.message;
       }
     }
 
+    const fallbackReason =
+      failureReason ??
+      (featureFlags.aiGeneration ? "generator_failed" : "missing_generator");
+
     return {
-      "package.json": buildPackageJson(),
-      ".env.example": buildEnvExample(),
-      ".gitignore": buildGitignore(),
-      "vite.config.js": buildViteConfig(),
-      "index.html": buildIndexHtml(),
-      "src/main.jsx": buildMainEntry(),
-      "src/App.jsx": buildAppComponent(),
-      "Dashboard.jsx": buildDashboardComponent(payload),
-      "components/Table.jsx": buildTableComponent(),
-      "components/Charts.jsx": buildChartsComponent(),
-      "components/CrudControls.jsx": buildCrudControlsComponent(),
-      "metadata.json": buildMetadataJson(payload),
-      "README.md": buildReadme(payload),
+      files: buildTemplateFiles(payload),
+      source: "template",
+      reason: fallbackReason,
     };
   },
 };

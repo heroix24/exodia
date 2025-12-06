@@ -22,6 +22,11 @@ repoRoutes.get("/", async (c) => {
 repoRoutes.post("/:excelId/publish", async (c) => {
   const user = c.get("user");
   const excelId = c.req.param("excelId");
+  const body = await c.req.json().catch(() => ({}));
+  const prompt =
+    typeof body?.prompt === "string" && body.prompt.trim().length > 0
+      ? body.prompt.trim()
+      : undefined;
   const metadata = await excelService.listSheets({ userId: user.id, excelId });
 
   const sheetsWithRows = await Promise.all(
@@ -36,8 +41,14 @@ repoRoutes.post("/:excelId/publish", async (c) => {
   );
 
   const enrichedMetadata = { ...metadata, sheets: sheetsWithRows };
-  const files = await aiService.generateDashboard(enrichedMetadata);
+  const {
+    files,
+    source: generator,
+    reason: generatorReason,
+  } = await aiService.generateDashboard(enrichedMetadata, { prompt });
   const record = await repoService.publish({ userId: user.id, excelId, files });
 
-  return c.json(success({ repo: record }, "Repo published"));
+  return c.json(
+    success({ repo: record, generator, generatorReason }, "Repo published")
+  );
 });
