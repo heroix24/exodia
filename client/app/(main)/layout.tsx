@@ -54,12 +54,6 @@ export default function MainLayout({
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="flex items-center justify-end gap-3 border-b border-slate-100 px-6 py-4">
-          <Button variant="outline" className="rounded-lg border-slate-200">
-            Upgrade
-          </Button>
-          <Button variant="outline" className="rounded-lg border-slate-200">
-            Feedback
-          </Button>
           <ProfileDropdown />
         </header>
 
