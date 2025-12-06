@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,36 +13,76 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Upload, X } from "lucide-react";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 const communityCards = [
   {
     title: "Cyberpunk dashboard design",
     author: "E",
     forks: "3K Forks",
-    theme: "from-gray-900 via-slate-800 to-gray-700 text-white",
   },
   {
     title: "Marketing Website",
     author: "J",
     forks: "2K Forks",
-    theme: "from-indigo-950 via-indigo-900 to-slate-900 text-white",
   },
   {
     title: "v0.me",
     author: "HB",
     forks: "279 Forks",
-    theme: "from-white via-slate-100 to-slate-50 text-slate-900 border",
   },
   {
     title: "E-commerce Store",
     author: "MK",
     forks: "1.5K Forks",
-    theme: "from-emerald-900 via-teal-800 to-cyan-900 text-white",
   },
 ];
 
+const defaultCardTheme =
+  "from-indigo-950 via-indigo-900 to-slate-900 text-white";
+
+const deploymentResult = {
+  status: "success",
+  message: "App created and deployed successfully",
+  data: {
+    repo: {
+      id: "567d2857-ea1b-490f-b9a1-044f8bdea36c",
+      userId: "262c43e5-99a9-49e6-9c95-2f048f5886bd",
+      excelId: "51f5377a-2cce-4f4d-9573-06643e225912",
+      repoName: "my-sales-dashboard",
+      repoUrl: "https://github.com/nikzr16/my-sales-dashboard",
+      branch: "main",
+      theme: "light",
+      netlifySiteUrl: "https://my-sales-dashboard-a00a2440.netlify.app/",
+      createdAt: "2025-12-06T19:30:31.683Z",
+      updatedAt: "2025-12-06T19:30:31.683Z",
+      netlify: {
+        siteId: "96cd2a54-1fde-43a1-bbfe-1e530a7d0754",
+        siteName: "my-sales-dashboard-a00a2440",
+        siteUrl: "https://my-sales-dashboard-a00a2440.netlify.app/",
+        adminUrl: "https://app.netlify.com/sites/my-sales-dashboard-a00a2440",
+        linked: true,
+      },
+    },
+    excelId: "51f5377a-2cce-4f4d-9573-06643e225912",
+    generator: "claude",
+  },
+} as const;
+
 export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [selectedCard, setSelectedCard] =
+    useState<(typeof communityCards)[number] | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [appName, setAppName] = useState("");
   const [githubToken, setGithubToken] = useState("");
   const [netlifyKey, setNetlifyKey] = useState("");
@@ -84,46 +124,174 @@ export default function DashboardPage() {
     setIsModalOpen(false);
   };
 
+  const handleCardClick = (card: (typeof communityCards)[number]) => {
+    setSelectedCard(card);
+    setIsDetailsOpen(true);
+  };
+
   const isFormValid =
     appName.trim() && githubToken.trim() && netlifyKey.trim() && file;
+
+  useEffect(() => {
+    const handler = () => setIsSearchOpen(true);
+    window.addEventListener("open-project-search", handler);
+    return () => window.removeEventListener("open-project-search", handler);
+  }, []);
+
+  const filteredCards = communityCards.filter((card) => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      card.title.toLowerCase().includes(query) ||
+      card.author.toLowerCase().includes(query) ||
+      card.forks.toLowerCase().includes(query)
+    );
+  });
 
   return (
     <main className="flex-1 flex flex-col overflow-auto px-4 pb-10">
       <section className="flex-1">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 pt-8">
           {/* Header with Create Button */}
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">
-              My Projects
-            </h2>
-            <Button onClick={() => setIsModalOpen(true)} className="gap-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-xl font-semibold text-slate-900">My Projects</h2>
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="gap-2 w-full sm:w-auto"
+            >
               <Plus className="h-4 w-4" />
               Create New App
             </Button>
           </div>
 
           {/* Cards Grid */}
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {communityCards.map((card, idx) => (
-              <div
-                key={idx}
-                className={`relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br ${card.theme} cursor-pointer transition-transform hover:scale-[1.02]`}
-              >
-                <div className="aspect-[4/3] w-full bg-black/20" />
-                <div className="flex items-center justify-between px-3 py-3 text-sm">
-                  <div className="text-left">
-                    <p className="font-semibold">{card.title}</p>
-                    <p className="text-xs opacity-70">{card.forks}</p>
-                  </div>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-900 shadow text-xs font-medium">
-                    {card.author}
+          {filteredCards.length ? (
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredCards.map((card, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => handleCardClick(card)}
+                  className={`relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br ${defaultCardTheme} cursor-pointer transition-transform hover:scale-[1.02]`}
+                >
+                  <div className="aspect-[4/3] w-full bg-black/20" />
+                  <div className="flex items-center justify-between px-3 py-3 text-sm">
+                    <div className="text-left">
+                      <p className="font-semibold">{card.title}</p>
+                      <p className="text-xs opacity-70">{card.forks}</p>
+                    </div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-900 shadow text-xs font-medium">
+                      {card.author}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+              No projects match “{searchTerm}”.
+            </div>
+          )}
         </div>
       </section>
+
+      {/* Search popup (command dialog) */}
+      <CommandDialog
+        open={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+        className="w-[520px] max-w-[90vw] sm:max-w-lg min-h-[360px]"
+      >
+        <CommandInput
+          value={searchTerm}
+          onValueChange={setSearchTerm}
+          placeholder="Search projects by name, author, or forks"
+        />
+        <CommandList className="h-72 overflow-y-auto">
+          <CommandEmpty>No projects found.</CommandEmpty>
+          <CommandGroup heading="Projects">
+            {filteredCards.map((card, idx) => (
+              <CommandItem
+                key={`${card.title}-${idx}`}
+                value={`${card.title} ${card.author} ${card.forks}`}
+                onSelect={() => {
+                  handleCardClick(card);
+                  setIsSearchOpen(false);
+                }}
+              >
+                <div className="flex flex-col">
+                  <span className="font-medium">{card.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Author: {card.author} · {card.forks}
+                  </span>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
+
+      {/* Deployment details dialog */}
+      <Dialog
+        open={isDetailsOpen}
+        onOpenChange={(open) => {
+          setIsDetailsOpen(open);
+          if (!open) setSelectedCard(null);
+        }}
+      >
+        <DialogContent
+          className={`w-[min(92vw,820px)] sm:max-w-2xl bg-gradient-to-br ${defaultCardTheme}`}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {selectedCard ? `${selectedCard.title} · Deployment` : "Deployment"}
+            </DialogTitle>
+            <DialogDescription>
+              Parameters returned after creating and deploying the app.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 rounded-lg border border-white/20 bg-white/10 p-3 backdrop-blur">
+              <div>
+                <p className="text-xs uppercase text-white/70">Repo</p>
+                <a
+                  href={deploymentResult.data.repo.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium break-words text-white hover:underline"
+                >
+                  {deploymentResult.data.repo.repoName}
+                </a>
+                <p className="break-words text-xs text-white/70">
+                  {deploymentResult.data.repo.repoUrl}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-white/70">Branch</p>
+                <p className="font-medium text-white">
+                  {deploymentResult.data.repo.branch}
+                </p>
+                <p className="text-xs text-white/70">
+                  Theme: {deploymentResult.data.repo.theme}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-white/70">Netlify Site</p>
+                <a
+                  href={deploymentResult.data.repo.netlify.siteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium break-words text-white hover:underline"
+                >
+                  {deploymentResult.data.repo.netlify.siteName}
+                </a>
+                <p className="break-words text-xs text-emerald-200">
+                  {deploymentResult.data.repo.netlify.siteUrl}
+                </p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Create New App Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

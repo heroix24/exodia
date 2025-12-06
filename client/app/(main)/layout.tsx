@@ -1,6 +1,11 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Layout, Search } from "lucide-react";
+
+const openProjectSearch = () =>
+  window.dispatchEvent(new CustomEvent("open-project-search"));
 
 const primaryNav = [
   { label: "Search", icon: Search },
@@ -33,14 +38,26 @@ export default function MainLayout({
         <nav className="space-y-6 text-sm">
           <div className="space-y-1">
             {primaryNav.map((item) => (
-              <a
-                key={item.label}
-                className="flex items-center gap-3 rounded-md px-2 py-2 text-slate-700 hover:bg-slate-100"
-                href={item.href}
-              >
-                <item.icon className="h-4 w-4 text-slate-500" />
-                {item.label}
-              </a>
+              item.label === "Search" ? (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={openProjectSearch}
+                  className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-slate-700 transition hover:bg-slate-100"
+                >
+                  <item.icon className="h-4 w-4 text-slate-500" />
+                  {item.label}
+                </button>
+              ) : (
+                <a
+                  key={item.label}
+                  className="flex items-center gap-3 rounded-md px-2 py-2 text-slate-700 hover:bg-slate-100"
+                  href={item.href}
+                >
+                  <item.icon className="h-4 w-4 text-slate-500" />
+                  {item.label}
+                </a>
+              )
             ))}
           </div>
 
