@@ -26,6 +26,10 @@ const swaggerPage = `<!doctype html>
   </body>
 </html>`;
 
+/**
+ * docsRoutes serves the Swagger UI shell and exposes the raw OpenAPI spec so
+ * clients can inspect the Exodia API surface.
+ */
 export const docsRoutes = new Hono();
 
 docsRoutes.get("/", (c) => c.html(swaggerPage));

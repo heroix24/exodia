@@ -15,6 +15,9 @@ const loginSchema = z.object({
   password: z.string().min(8),
 });
 
+/**
+ * authRoutes wires registration and login handlers backed by authService.
+ */
 export const authRoutes = new Hono();
 
 authRoutes.post("/register", async (c) => {

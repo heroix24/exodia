@@ -5,6 +5,10 @@ import { aiService } from "../services/aiService.js";
 import { repoService } from "../services/repoService.js";
 import { success } from "../utils/http.js";
 
+/**
+ * repoRoutes exposes authenticated endpoints for listing repos and publishing
+ * AI-generated dashboards derived from Excel data.
+ */
 export const repoRoutes = new Hono();
 
 repoRoutes.use("*", requireAuth);

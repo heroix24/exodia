@@ -7,6 +7,17 @@ info:
 servers:
   - url: http://localhost:8000
     description: Local development
+tags:
+  - name: Health
+    description: Monitor-only endpoints used to confirm uptime.
+  - name: Auth
+    description: Public registration and login endpoints that issue JWTs.
+  - name: Uploads
+    description: Authenticated Excel ingestion endpoints.
+  - name: Sheets
+    description: Sheet metadata retrieval and row CRUD endpoints.
+  - name: Repos
+    description: Publishing endpoints that turn spreadsheets into hosted dashboards.
 components:
   securitySchemes:
     bearerAuth:
@@ -79,6 +90,9 @@ paths:
   /health:
     get:
       summary: Health check
+      description: Lightweight heartbeat endpoint for uptime monitors and load balancers.
+      tags:
+        - Health
       responses:
         "200":
           description: Server status
@@ -92,6 +106,9 @@ paths:
   /api/v1/auth/register:
     post:
       summary: Register
+      description: Creates a new user account and issues a JWT plus profile payload for subsequent API calls.
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -117,6 +134,9 @@ paths:
   /api/v1/auth/login:
     post:
       summary: Login
+      description: Authenticates credentials and returns a JWT-protected session object.
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -141,6 +161,9 @@ paths:
       security:
         - bearerAuth: []
       summary: Upload Excel
+      description: Accepts an authenticated multipart Excel payload and hands it to excelService for ingestion.
+      tags:
+        - Uploads
       requestBody:
         required: true
         content:
@@ -169,6 +192,9 @@ paths:
       security:
         - bearerAuth: []
       summary: List sheets
+      description: Returns workbook metadata for the authenticated owner's Excel file, including sheet labels and column definitions.
+      tags:
+        - Sheets
       parameters:
         - in: path
           name: excelId
@@ -192,6 +218,9 @@ paths:
       security:
         - bearerAuth: []
       summary: Fetch rows
+      description: Returns all rows for the specified sheet after verifying ownership of the parent workbook.
+      tags:
+        - Sheets
       parameters:
         - in: path
           name: excelId
@@ -220,6 +249,9 @@ paths:
       security:
         - bearerAuth: []
       summary: Add row
+      description: Validates the JSON payload and appends a new row to the selected sheet.
+      tags:
+        - Sheets
       parameters:
         - in: path
           name: excelId
@@ -245,6 +277,9 @@ paths:
       security:
         - bearerAuth: []
       summary: Update row
+      description: Replaces the stored row values identified by rowId after validating the payload schema.
+      tags:
+        - Sheets
       parameters:
         - in: path
           name: excelId
@@ -274,6 +309,9 @@ paths:
       security:
         - bearerAuth: []
       summary: Delete row
+      description: Removes the row referenced by rowId and returns the updated sheet snapshot.
+      tags:
+        - Sheets
       parameters:
         - in: path
           name: excelId
@@ -298,6 +336,9 @@ paths:
       security:
         - bearerAuth: []
       summary: List published repos
+      description: Returns the dashboards that have already been published to GitHub for the authenticated user.
+      tags:
+        - Repos
       responses:
         "200":
           description: Repo list
@@ -315,6 +356,9 @@ paths:
       security:
         - bearerAuth: []
       summary: Publish dashboard to GitHub
+      description: Enriches the Excel workbook data, generates a dashboard via aiService, and publishes the files to the configured GitHub repository.
+      tags:
+        - Repos
       parameters:
         - in: path
           name: excelId

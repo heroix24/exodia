@@ -7,6 +7,10 @@ import { validate } from "../utils/validation.js";
 
 const rowPayloadSchema = z.record(z.any());
 
+/**
+ * sheetRoutes provides authenticated endpoints for listing sheets and managing
+ * row data inside an uploaded Excel workbook.
+ */
 export const sheetRoutes = new Hono();
 
 sheetRoutes.use("*", requireAuth);

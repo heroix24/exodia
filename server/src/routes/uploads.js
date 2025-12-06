@@ -3,6 +3,10 @@ import { requireAuth } from "../middleware/auth.js";
 import { excelService } from "../services/excelService.js";
 import { success } from "../utils/http.js";
 
+/**
+ * uploadRoutes handles authenticated Excel file uploads before downstream
+ * processing by excelService.
+ */
 export const uploadRoutes = new Hono();
 
 uploadRoutes.use("*", requireAuth);
