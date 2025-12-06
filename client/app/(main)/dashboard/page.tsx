@@ -1,32 +1,14 @@
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
   AudioLines,
   ChevronDown,
-  Clock,
   FileInput,
   ImageIcon,
-  Layout,
-  MessageCircle,
-  Search,
-  Sparkles,
-  Star,
   Upload,
-  Users,
 } from "lucide-react";
-
-const primaryNav = [
-  { label: "Search", icon: Search },
-  { label: "Projects", icon: Layout },
-  { label: "Recents", icon: Clock },
-  { label: "Community", icon: Users },
-];
-
-const secondaryNav = [
-  { label: "Favorite Projects", icon: Star },
-  { label: "Favorite Chats", icon: MessageCircle },
-  { label: "Recents", icon: Clock },
-];
+import { ProfileDropdown } from "@/components/profile-dropdown";
 
 const quickActions = [
   { label: "Clone a Screenshot", icon: ImageIcon },
@@ -59,160 +41,93 @@ const communityCards = [
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex">
-      {/* Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col border-r border-slate-200 px-5 py-6 gap-6">
-        <div className="flex items-center gap-2 text-sm font-semibold">
-          <div className="h-9 w-9 rounded-lg bg-black text-white flex items-center justify-center text-xs font-bold">
-            v0
-          </div>
-          <span>Personal</span>
-        </div>
-
-        <Button
-          variant="outline"
-          className="w-full justify-start rounded-lg border border-slate-200 text-slate-700"
-        >
-          <span className="mr-2">+</span> New Chat
+    <main className="flex-1 flex flex-col">
+      <header className="flex items-center justify-end gap-3 border-b border-slate-100 px-6 py-4">
+        <Button variant="outline" className="rounded-lg border-slate-200">
+          Upgrade
         </Button>
+        <Button variant="outline" className="rounded-lg border-slate-200">
+          Feedback
+        </Button>
+        <ProfileDropdown />
+      </header>
 
-        <nav className="space-y-6 text-sm">
-          <div className="space-y-1">
-            {primaryNav.map((item) => (
-              <a
-                key={item.label}
-                className="flex items-center gap-3 rounded-md px-2 py-2 text-slate-700 hover:bg-slate-100"
-                href="#"
-              >
-                <item.icon className="h-4 w-4 text-slate-500" />
-                {item.label}
-              </a>
-            ))}
+      <section className="flex-1 overflow-auto px-4 pb-10">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 pt-8 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-600">
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
+              New
+            </span>
+            Edit faster with Design Mode
+            <span className="text-emerald-600">Try it now</span>
           </div>
 
-          <div className="space-y-2">
-            {secondaryNav.map((item) => (
-              <a
-                key={item.label}
-                className="flex items-center gap-3 rounded-md px-2 py-2 text-slate-600 hover:bg-slate-100"
-                href="#"
-              >
-                <item.icon className="h-4 w-4 text-slate-400" />
-                {item.label}
-              </a>
-            ))}
-          </div>
+          <div className="space-y-4">
+            <h1 className="text-4xl font-bold">What can I help you build?</h1>
 
-          <div className="rounded-lg border border-slate-200 px-3 py-4 text-center text-xs text-slate-500">
-            You haven&apos;t created any chats yet.
-          </div>
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 flex flex-col">
-        <header className="flex items-center justify-end gap-3 border-b border-slate-100 px-6 py-4">
-          <Button variant="outline" className="rounded-lg border-slate-200">
-            Upgrade
-          </Button>
-          <Button variant="outline" className="rounded-lg border-slate-200">
-            Feedback
-          </Button>
-          <div className="h-9 w-9 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-semibold">
-            •
-          </div>
-        </header>
-
-        <section className="flex-1 overflow-auto px-4 pb-10">
-          <div className="mx-auto flex max-w-5xl flex-col items-center gap-10 pt-8 text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-600">
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">
-                New
-              </span>
-              Edit faster with Design Mode
-              <span className="text-emerald-600">Try it now</span>
-            </div>
-
-            <div className="space-y-4">
-              <h1 className="text-4xl font-bold">What can I help you build?</h1>
-
-              <div className="w-full">
-                <div className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                  <AudioLines className="h-5 w-5 text-emerald-600" />
-                  <input
-                    className="flex-1 border-none bg-transparent text-slate-700 outline-none placeholder:text-slate-400"
-                    placeholder="Ask v0 to build..."
-                  />
-                  <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600">
-                    v0-1.5-md
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                  <Button size="icon" variant="ghost" className="text-slate-500">
-                    <Sparkles className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="text-slate-500">
-                    <Upload className="h-4 w-4" />
-                  </Button>
+            <div className="w-full">
+              <div className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <AudioLines className="h-5 w-5 text-emerald-600" />
+                <input
+                  className="flex-1 border-none bg-transparent text-slate-700 outline-none placeholder:text-slate-400"
+                  placeholder="Ask v0 to build..."
+                />
+                <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600">
+                  v0-1.5-md
+                  <ChevronDown className="h-4 w-4" />
                 </div>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-                {quickActions.map((action) => (
-                  <Button
-                    key={action.label}
-                    variant="outline"
-                    className="rounded-lg border-slate-200 bg-white px-4 py-2 text-slate-700 hover:bg-slate-50"
-                  >
-                    {action.icon && (
-                      <action.icon className="mr-2 h-4 w-4 text-slate-500" />
-                    )}
-                    {action.label}
-                  </Button>
-                ))}
+                <Button size="icon" variant="ghost" className="text-slate-500">
+                  <Upload className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
-            <div className="w-full space-y-4">
-              <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
-                <span>From the Community</span>
-                <a className="text-slate-500 hover:text-slate-700" href="#">
-                  Browse All
-                </a>
-              </div>
+            <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+              {quickActions.map((action) => (
+                <Button
+                  key={action.label}
+                  variant="outline"
+                  className="rounded-lg border-slate-200 bg-white px-4 py-2 text-slate-700 hover:bg-slate-50"
+                >
+                  {action.icon && (
+                    <action.icon className="mr-2 h-4 w-4 text-slate-500" />
+                  )}
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+          </div>
 
-              <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
-                {communityCards.map((card, idx) => (
-                  <div
-                    key={idx}
-                    className={`relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br ${card.theme}`}
-                  >
-                    <div className="aspect-[4/3] w-full bg-black/20" />
-                    <div className="flex items-center justify-between px-3 py-3 text-sm">
-                      <div>
-                        <p className="font-semibold">{card.title}</p>
-                        <p className="text-xs opacity-70">{card.forks}</p>
-                      </div>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-900 shadow">
-                        {card.author}
-                      </div>
+          <div className="w-full space-y-4">
+            <div className="flex items-center justify-between text-sm font-semibold text-slate-700">
+              <span>From the Community</span>
+              <a className="text-slate-500 hover:text-slate-700" href="#">
+                Browse All
+              </a>
+            </div>
+
+            <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
+              {communityCards.map((card, idx) => (
+                <div
+                  key={idx}
+                  className={`relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br ${card.theme}`}
+                >
+                  <div className="aspect-[4/3] w-full bg-black/20" />
+                  <div className="flex items-center justify-between px-3 py-3 text-sm">
+                    <div>
+                      <p className="font-semibold">{card.title}</p>
+                      <p className="text-xs opacity-70">{card.forks}</p>
+                    </div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-slate-900 shadow">
+                      {card.author}
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
-        </section>
-
-        <footer className="mt-auto flex items-center justify-between bg-slate-900 px-4 py-3 text-sm text-white">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-black text-white text-xs font-bold">
-              v0
-            </div>
-            <span>v0</span>
-          </div>
-          <span className="text-slate-200">curated by Mobbin</span>
-        </footer>
-      </main>
-    </div>
+        </div>
+      </section>
+    </main>
   );
 }

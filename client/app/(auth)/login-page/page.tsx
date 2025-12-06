@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Eye, EyeOff, Github } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 const GoogleIcon = () => (
   <svg
@@ -40,6 +41,7 @@ const API_BASE =
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -66,11 +68,9 @@ export default function LoginPage() {
 
       const { token, user } = json.data ?? {};
 
-      if (token) {
-        localStorage.setItem("exodia_token", token);
-      }
-      if (user) {
-        localStorage.setItem("exodia_user", JSON.stringify(user));
+      if (token && user) {
+        // Store token with 2-hour expiry via auth context
+        login(token, user);
       }
 
       router.push("/dashboard");

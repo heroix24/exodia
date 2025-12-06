@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Edu_TAS_Beginner } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
+import { SessionExpiredModal } from "@/components/session-expired-modal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +35,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${eduTASBeginner.variable} antialiased`}
       >
-        {children}
+        <AuthProvider>
+          {children}
+          <SessionExpiredModal />
+        </AuthProvider>
       </body>
     </html>
   );
