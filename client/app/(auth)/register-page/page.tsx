@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Github } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,9 +29,60 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:8000/api/v1";
+
 export default function RegisterPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, password }),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok || json.status !== "success") {
+        throw new Error(json?.message || "Unable to sign up");
+      }
+
+      const { token, user } = json.data ?? {};
+
+      if (token) {
+        localStorage.setItem("exodia_token", token);
+      }
+      if (user) {
+        localStorage.setItem("exodia_user", JSON.stringify(user));
+      }
+
+      router.push("/landing-page");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unexpected error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr] bg-[#f6ede2] text-[#1a5f3c]">
@@ -76,12 +128,17 @@ export default function RegisterPage() {
             </Button>
           </div>
 
-          <div className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className="text-sm font-medium text-[#1a3d2e]">Full Name</label>
               <Input
                 type="text"
+                name="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your name"
+                required
+                minLength={2}
                 className="h-11 border border-[#1a5f3c] bg-transparent text-[#1a3d2e] placeholder:text-[#1a3d2e]/60 focus-visible:ring-[#1a5f3c]"
               />
             </div>
@@ -90,7 +147,11 @@ export default function RegisterPage() {
               <label className="text-sm font-medium text-[#1a3d2e]">Email Address</label>
               <Input
                 type="email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                required
                 className="h-11 border border-[#1a5f3c] bg-transparent text-[#1a3d2e] placeholder:text-[#1a3d2e]/60 focus-visible:ring-[#1a5f3c]"
               />
             </div>
@@ -101,7 +162,12 @@ export default function RegisterPage() {
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="......"
+                    required
+                    minLength={8}
                     className="h-11 border border-[#1a5f3c] bg-transparent text-[#1a3d2e] placeholder:text-[#1a3d2e]/60 focus-visible:ring-[#1a5f3c]"
                   />
                   <button
@@ -116,11 +182,16 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#1a3d2e]">Password</label>
+                <label className="text-sm font-medium text-[#1a3d2e]">Confirm Password</label>
                 <div className="relative">
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="......"
+                    required
+                    minLength={8}
                     className="h-11 border border-[#1a5f3c] bg-transparent text-[#1a3d2e] placeholder:text-[#1a3d2e]/60 focus-visible:ring-[#1a5f3c]"
                   />
                   <button
@@ -135,10 +206,20 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <Button className="h-11 w-full bg-[#1a5f3c] text-white hover:bg-[#154a2f]">
-              Sign in
+            {error && (
+              <p className="text-sm text-red-600" role="alert" aria-live="polite">
+                {error}
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="h-11 w-full bg-[#1a5f3c] text-white hover:bg-[#154a2f] disabled:opacity-80"
+            >
+              {isSubmitting ? "Creating account..." : "Create account"}
             </Button>
-          </div>
+          </form>
 
           <p className="text-center text-sm text-[#1a3d2e]/70">
             Already have an account?{" "}
