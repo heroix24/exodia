@@ -19,9 +19,24 @@ const ddlStatements = [
     github_repo_url TEXT NOT NULL,
     github_branch TEXT NOT NULL DEFAULT 'main',
     theme TEXT NOT NULL DEFAULT 'light',
+    netlify_site_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`,
+];
+
+// Migration statements to add new columns to existing tables
+const migrationStatements = [
+  // Add netlify_site_url column if it doesn't exist
+  `DO $$ 
+   BEGIN 
+     IF NOT EXISTS (
+       SELECT 1 FROM information_schema.columns 
+       WHERE table_name = 'repo' AND column_name = 'netlify_site_url'
+     ) THEN 
+       ALTER TABLE repo ADD COLUMN netlify_site_url TEXT;
+     END IF;
+   END $$`,
 ];
 
 const ensureTimestampsTrigger = `
@@ -51,6 +66,11 @@ export const ensureDatabaseSchema = async () => {
 
   for (const statement of ddlStatements) {
     await db.query(statement);
+  }
+
+  // Run migrations for existing tables
+  for (const migration of migrationStatements) {
+    await db.query(migration);
   }
 
   await db.query(ensureTimestampsTrigger);
